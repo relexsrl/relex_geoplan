@@ -1,0 +1,14 @@
+[general]
+name=Relex Geoplan
+qgisMinimumVersion=3.22
+description=Extract parcel polygons from a georeferenced plano TIFF
+about=Extracts parcel polygons from a georeferenced plano image using a line-arrangement CV pipeline, with per-parcel review and save-to-parcelas-layer workflow. Core logic is QGIS-agnostic.
+version=0.0.0
+author=Relex
+email=contacto@relex.ar
+homepage=https://github.com/relexsrl/relex_geoplan
+repository=https://github.com/relexsrl/relex_geoplan
+category=Plugins
+icon=icon.svg
+experimental=True
+deprecated=False
