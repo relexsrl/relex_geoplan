@@ -34,8 +34,8 @@
     </message>
     <message>
       <location filename="../plugin.py" line="636" />
-      <source>Click to add polygon vertices. Double-click or right-click to finish. Right-click with fewer than 3 vertices, or press Esc, to cancel.</source>
-      <translation>Haga clic para agregar vértices al polígono. Haga doble clic o clic derecho para terminar. Con menos de 3 vértices, haga clic derecho o presione Esc para cancelar.</translation>
+      <source>Click to add polygon vertices. Right-click to finish. Right-click with fewer than 3 vertices, or press Esc, to cancel.</source>
+      <translation>Haga clic para agregar vértices al polígono. Haga clic derecho para terminar. Con menos de 3 vértices, haga clic derecho o presione Esc para cancelar.</translation>
     </message>
     <message>
       <location filename="../plugin.py" line="1355" />
@@ -342,8 +342,8 @@ Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
     </message>
     <message>
       <location filename="../plugin.py" line="2522" />
-      <source>Load debug layers (mask, circles, lines)</source>
-      <translation>Cargar capas de diagnóstico (máscara, círculos, líneas)</translation>
+      <source>Load debug layers (masks and lines)</source>
+      <translation>Cargar capas de diagnóstico (máscaras y líneas)</translation>
     </message>
     <message>
       <location filename="../plugin.py" line="2524" />
@@ -508,6 +508,62 @@ Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
 
 Complete their required identity fields, then try again.</source>
       <translation>Estas parcelas no se pueden guardar:
+
+{detail}
+
+Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
+    </message>
+    <message>
+      <source>No temporary parcel or block layers found. Extract first.</source>
+      <translation>No se encontraron capas temporales de parcelas o manzanas. Extraiga geometría primero.</translation>
+    </message>
+    <message>
+      <source>Select exactly one writable polygon layer with cca and etiqueta fields in the Layers panel.</source>
+      <translation>Seleccione exactamente una capa poligonal editable con campos cca y etiqueta en el panel Capas.</translation>
+    </message>
+    <message>
+      <source>Save extracted geometry</source>
+      <translation>Guardar geometría extraída</translation>
+    </message>
+    <message>
+      <source>Temporary parcel and block layers to save</source>
+      <translation>Capas temporales de parcelas y manzanas para guardar</translation>
+    </message>
+    <message>
+      <source>Flash this layer's geometry on the map</source>
+      <translation>Resaltar la geometría de esta capa en el mapa</translation>
+    </message>
+    <message>
+      <source>No temporary parcel or block layers left. Extract first.</source>
+      <translation>No quedan capas temporales de parcelas o manzanas. Extraiga geometría primero.</translation>
+    </message>
+    <message>
+      <source>Complete the required cadastral identity and review fields.</source>
+      <translation>Complete los campos requeridos de identidad catastral y revisión.</translation>
+    </message>
+    <message>
+      <source>Incomplete geometry: {details}. {requirement}</source>
+      <translation>Geometría incompleta: {details}. {requirement}</translation>
+    </message>
+    <message>
+      <source>{count} feature(s) ready to save. Counts refresh whenever you return to this window.</source>
+      <translation>{count} elemento(s) listo(s) para guardar. Los conteos se actualizan al volver a esta ventana.</translation>
+    </message>
+    <message>
+      <source>Save geometry</source>
+      <translation>Guardar geometría</translation>
+    </message>
+    <message>
+      <source>Incomplete geometry data</source>
+      <translation>Datos de geometría incompletos</translation>
+    </message>
+    <message>
+      <source>These features cannot be saved:
+
+{detail}
+
+Complete their required identity fields, then try again.</source>
+      <translation>Estos elementos no se pueden guardar:
 
 {detail}
 

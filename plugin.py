@@ -220,26 +220,16 @@ def _layer_role(layer):
     return str(layer.customProperty("parcel_geometry/role", "") or "").strip().lower()
 
 
-def _is_parcelas_destination_layer(layer):
-    """Whether a loaded project layer can receive reviewed parcels."""
+def _is_publish_destination_layer(layer):
+    """Whether a loaded project layer can receive extracted geometry."""
     if not _is_writable_polygon_layer(layer):
-        return False
-    if (_layer_role(layer) not in ("", "destination")
-            or _layer_kind(layer) not in ("", "parcela")):
         return False
     fields = layer.fields()
     return fields.indexOf("cca") >= 0 and fields.indexOf("etiqueta") >= 0
 
 
-def _is_manzanas_destination_layer(layer):
-    """Whether a loaded project layer can receive extracted manzana outlines."""
-    if not _is_writable_polygon_layer(layer):
-        return False
-    if (_layer_role(layer) not in ("", "destination")
-            or _layer_kind(layer) not in ("", "manzana")):
-        return False
-    fields = layer.fields()
-    return fields.indexOf("codigo") >= 0 and fields.indexOf("mz") >= 0
+def _is_temporary_publish_layer(layer):
+    return _is_temporary_parcel_layer(layer) or _is_temporary_manzana_layer(layer)
 
 
 def _is_temporary_memory_polygon_layer(layer):
@@ -635,7 +625,7 @@ class ParcelGeometryPlugin:
 
         self.iface.messageBar().pushInfo(
             "Relex Geoplan",
-            tr("Click to add polygon vertices. Double-click or right-click to finish. "
+            tr("Click to add polygon vertices. Right-click to finish. "
                "Right-click with fewer than 3 vertices, or press Esc, to cancel."),
         )
         self.previous_tool = self.iface.mapCanvas().mapTool()
@@ -1449,36 +1439,27 @@ class ParcelGeometryPlugin:
         db_layer = self._selected_destination_layer()
         if db_layer is None:
             return
-        # the selected destination decides the flow: parcelas schema takes the
-        # reviewed parcel layers, manzanas schema takes the manzana outlines
-        if _is_parcelas_destination_layer(db_layer):
-            source_pred, collect = _is_temporary_parcel_layer, self._collect_layer_records
-            kind = "parcel"
-        else:
-            source_pred, collect = _is_temporary_manzana_layer, self._collect_manzana_records
-            kind = "manzana"
-
         eligible = [
             layer for layer in QgsProject.instance().mapLayers().values()
-            if source_pred(layer)
+            if _is_temporary_publish_layer(layer)
         ]
         if not eligible:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Relex Geoplan",
-                f"No temporary {kind} layers found. Extract first.",
+                tr("No temporary parcel or block layers found. Extract first."),
             )
             return
 
         preselect = set(self.iface.layerTreeView().selectedLayers())
         dialog = PublishDialog(
             self.iface.mainWindow(), eligible, preselect, db_layer,
-            collect=collect,
+            collect=self._collect_publish_records,
             on_save=self._apply_publish,
             highlight=self._flash_publish_layer,
             on_check=self._set_publish_selection,
-            source_pred=source_pred,
-            kind=kind,
+            source_pred=_is_temporary_publish_layer,
+            kind="geometry",
         )
         self._publish_dialog = dialog
         dialog.finished.connect(self._on_publish_dialog_finished)
@@ -1540,22 +1521,21 @@ class ParcelGeometryPlugin:
         selected = [
             layer
             for layer in self.iface.layerTreeView().selectedLayers()
-            if _is_parcelas_destination_layer(layer)
-            or _is_manzanas_destination_layer(layer)
+            if _is_publish_destination_layer(layer)
         ]
         if len(selected) == 1:
             return selected[0]
         QMessageBox.warning(
             self.iface.mainWindow(),
             "Relex Geoplan",
-            "Select exactly one writable parcels or blocks polygon layer "
-            "in the Layers panel.",
+            tr("Select exactly one writable polygon layer with cca and etiqueta "
+               "fields in the Layers panel."),
         )
         return None
 
     def _collect_manzana_records(self, layer):
         """Manzana temp layer -> publishable records. A row needs geometry and
-        a complete 15-digit codigo; the mz column echoes the codigo tail."""
+        a complete 15-digit code; etiqueta echoes its four-digit block number."""
         records, incomplete = [], []
         for feature in layer.getFeatures():
             geom = feature.geometry()
@@ -1569,13 +1549,18 @@ class ParcelGeometryPlugin:
             if codigo:
                 records.append((
                     QgsGeometry(geom),
-                    {"codigo": codigo, "mz": codigo[11:15]},
+                    {"cca": codigo, "etiqueta": codigo[11:15]},
                     layer.crs(),
                 ))
             else:
                 idx = feature.fields().indexOf("id")
                 incomplete.append(feature["id"] if idx >= 0 else feature.id())
         return records, incomplete
+
+    def _collect_publish_records(self, layer):
+        if _is_temporary_manzana_layer(layer):
+            return self._collect_manzana_records(layer)
+        return self._collect_layer_records(layer)
 
     def _collect_layer_records(self, layer):
         """Split a temporary parcel layer into publishable records and the fids of
@@ -1619,11 +1604,8 @@ class ParcelGeometryPlugin:
         return records, incomplete
 
     def _append_to_parcelas_layer(self, db_layer, records):
-        """Append records through the selected project layer provider. Serves
-        both destination schemas — the field loop below skips columns the
-        destination lacks (e.g. manzanas has no fecha/etiqueta)."""
-        if not (_is_parcelas_destination_layer(db_layer)
-                or _is_manzanas_destination_layer(db_layer)):
+        """Append records through the selected project layer provider."""
+        if not _is_publish_destination_layer(db_layer):
             return 0, "The selected destination layer is no longer available."
         fields = db_layer.fields()
         now = datetime.now().isoformat(sep=" ", timespec="seconds")
@@ -2208,12 +2190,9 @@ class PublishDialog(QDialog):
                  kind="parcel"):
         super().__init__(parent)
         self._kind = kind
-        self._singular = "block" if kind == "manzana" else "parcel"
-        self._plural = "blocks" if kind == "manzana" else "parcels"
-        self.setWindowTitle(
-            tr("Save extracted blocks")
-            if kind == "manzana" else tr("Save reviewed parcels")
-        )
+        self._singular = "feature"
+        self._plural = "features"
+        self.setWindowTitle(tr("Save extracted geometry"))
         self._collect = collect
         self._on_save = on_save
         self._highlight = highlight
@@ -2226,10 +2205,7 @@ class PublishDialog(QDialog):
         self._rows = []  # {widget, cb, status, layer, id, records, incomplete}
         layout = QVBoxLayout(self)
 
-        src_group = QGroupBox(
-            tr("Temporary block layers to save")
-            if kind == "manzana" else tr("Temporary parcel layers to save")
-        )
+        src_group = QGroupBox(tr("Temporary parcel and block layers to save"))
         self._src_layout = QVBoxLayout(src_group)
         for layer in layers:
             self._add_row(layer, layer in preselect)
@@ -2275,10 +2251,7 @@ class PublishDialog(QDialog):
         cb.stateChanged.connect(self._update_hint)
         status = QLabel("")
         show = QPushButton(tr("Locate"))
-        show.setToolTip(
-            tr("Flash this layer's blocks on the map")
-            if self._kind == "manzana" else tr("Flash this layer's parcels on the map")
-        )
+        show.setToolTip(tr("Flash this layer's geometry on the map"))
         show.clicked.connect(lambda _checked=False, l=layer: self._highlight(l))
         h.addWidget(cb)
         h.addWidget(status, 1)
@@ -2373,11 +2346,7 @@ class PublishDialog(QDialog):
             return
         chosen, bad = self._chosen_and_bad()
         if not self._rows:
-            self._hint.setText(
-                tr("No temporary block layers left. Extract blocks first.")
-                if self._kind == "manzana"
-                else tr("No temporary parcel layers left. Extract parcels first.")
-            )
+            self._hint.setText(tr("No temporary parcel or block layers left. Extract first."))
         elif not chosen:
             self._hint.setText(tr("Select at least one temporary layer to save."))
         elif bad:
@@ -2388,26 +2357,13 @@ class PublishDialog(QDialog):
                 )
                 for r in bad
             )
-            requirement = (
-                tr("Complete the cadastral designation so each feature has a valid block code.")
-                if self._kind == "manzana"
-                else tr("Finish the parcel review and provide a valid parcel number.")
-            )
-            template = (
-                tr("Incomplete blocks: {details}. {requirement}")
-                if self._kind == "manzana"
-                else tr("Incomplete parcels: {details}. {requirement}")
-            )
+            requirement = tr("Complete the required cadastral identity and review fields.")
+            template = tr("Incomplete geometry: {details}. {requirement}")
             self._hint.setText(template.format(details=details, requirement=requirement))
         else:
             total = sum(len(r["records"]) for r in chosen)
-            template = (
-                tr("{count} block(s) ready to save. Counts refresh whenever you return "
-                   "to this window.")
-                if self._kind == "manzana"
-                else tr("{count} parcel(s) ready to save. Counts refresh whenever you "
-                        "return to this window.")
-            )
+            template = tr("{count} feature(s) ready to save. Counts refresh whenever you "
+                          "return to this window.")
             self._hint.setText(template.format(count=total))
 
     def _try_save(self):
@@ -2420,7 +2376,7 @@ class PublishDialog(QDialog):
         if not chosen:
             QMessageBox.information(
                 self,
-                tr("Save blocks") if self._kind == "manzana" else tr("Save parcels"),
+                tr("Save geometry"),
                 tr("Select at least one layer."),
             )
             return
@@ -2434,13 +2390,9 @@ class PublishDialog(QDialog):
             )
             QMessageBox.warning(
                 self,
-                (tr("Incomplete block data") if self._kind == "manzana"
-                 else tr("Incomplete parcel data")),
-                (tr("These blocks cannot be saved:\n\n{detail}\n\nComplete their required "
-                    "identity fields, then try again.")
-                 if self._kind == "manzana"
-                 else tr("These parcels cannot be saved:\n\n{detail}\n\nComplete their required "
-                         "identity fields, then try again.")).format(detail=detail),
+                tr("Incomplete geometry data"),
+                tr("These features cannot be saved:\n\n{detail}\n\nComplete their required "
+                   "identity fields, then try again.").format(detail=detail),
             )
             return
         if self._on_save(self._dest, [(r["layer"], r["records"]) for r in chosen]):
@@ -2519,7 +2471,7 @@ class ExtractionSettingsDialog(QDialog):
             val = self._settings.value(self.SETTINGS_PREFIX + key, default)
             return val in (True, "true", "True", "1", 1)
 
-        self.debug_layers = QCheckBox(tr("Load debug layers (mask, circles, lines)"))
+        self.debug_layers = QCheckBox(tr("Load debug layers (masks and lines)"))
         self.debug_layers.setChecked(_bool_setting("debug_layers", False))
         self.clip_to_selection = QCheckBox(tr("Keep only output inside selection polygon"))
         self.clip_to_selection.setChecked(_bool_setting("clip_to_selection", True))
@@ -2816,8 +2768,8 @@ class MarkerPickTool(QgsMapTool):
 class PolygonRoiTool(QgsMapTool):
     """Map tool to click out a polygon ROI vertex by vertex.
 
-    Left-click adds a vertex, Backspace removes the last, double-click or
-    right-click (with >= 3 vertices) finishes and emits
+    Left-click adds a vertex, Backspace removes the last, and right-click
+    (with >= 3 vertices) finishes and emits
     ``polygonFinished(list[QgsPointXY])``; Esc emits ``cancelled``.
     """
 
@@ -2858,10 +2810,6 @@ class PolygonRoiTool(QgsMapTool):
         self.temp_band.addPoint(self.vertices[-1], False)
         self.temp_band.addPoint(current, False)
         self.temp_band.show()
-
-    def canvasDoubleClickEvent(self, event):
-        if len(self.vertices) >= 3:
-            self._finish()
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Escape:
