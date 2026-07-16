@@ -27,4 +27,4 @@ def install_translator(plugin_dir):
 
 
 def tr(text):
-    return QCoreApplication.translate("@default", text)
+    return QCoreApplication.translate("RelexGeoplan", text)

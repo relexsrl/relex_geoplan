@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <TS version="2.1">
   <context>
-    <name>@default</name>
+    <name>RelexGeoplan</name>
     <message>
       <location filename="../plugin.py" line="555" />
       <source>Extract parcel(s)</source>
@@ -193,16 +193,6 @@
       <translation>Restaurar</translation>
     </message>
     <message>
-      <location filename="../plugin.py" line="2213" />
-      <source>Save extracted blocks</source>
-      <translation>Guardar manzanas extraídas</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2229" />
-      <source>Temporary block layers to save</source>
-      <translation>Capas temporales de manzanas para guardar</translation>
-    </message>
-    <message>
       <location filename="../plugin.py" line="2238" />
       <source>Selected project destination</source>
       <translation>Destino seleccionado del proyecto</translation>
@@ -223,11 +213,6 @@
       <translation>SRC: {crs} (la geometría se reproyectará para coincidir)</translation>
     </message>
     <message>
-      <location filename="../plugin.py" line="2278" />
-      <source>Flash this layer's blocks on the map</source>
-      <translation>Resaltar las manzanas de esta capa en el mapa</translation>
-    </message>
-    <message>
       <location filename="../plugin.py" line="2306" />
       <source>{ready} ready ✓ / {bad} incomplete or unreviewed ✗ (id {ids}{more})</source>
       <translation>{ready} lista(s) ✓ / {bad} incompleta(s) o sin revisar ✗ (id {ids}{more})</translation>
@@ -243,11 +228,6 @@
       <translation>La capa de destino fue eliminada del proyecto. Cierre este diálogo y vuelva a abrirlo con una capa de destino seleccionada.</translation>
     </message>
     <message>
-      <location filename="../plugin.py" line="2376" />
-      <source>No temporary block layers left. Extract blocks first.</source>
-      <translation>No quedan capas temporales de manzanas. Extraiga manzanas primero.</translation>
-    </message>
-    <message>
       <location filename="../plugin.py" line="2382" />
       <source>Select at least one temporary layer to save.</source>
       <translation>Seleccione al menos una capa temporal para guardar.</translation>
@@ -258,41 +238,6 @@
       <translation>{layer}: entidad(es) {ids}</translation>
     </message>
     <message>
-      <location filename="../plugin.py" line="2391" />
-      <source>Complete the cadastral designation so each feature has a valid block code.</source>
-      <translation>Complete la nomenclatura catastral para que cada entidad tenga un código de manzana válido.</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2391" />
-      <source>Finish the parcel review and provide a valid parcel number.</source>
-      <translation>Finalice la revisión de parcelas e indique un número de parcela válido.</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2396" />
-      <source>Incomplete blocks: {details}. {requirement}</source>
-      <translation>Manzanas incompletas: {details}. {requirement}</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2396" />
-      <source>Incomplete parcels: {details}. {requirement}</source>
-      <translation>Parcelas incompletas: {details}. {requirement}</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2404" />
-      <source>{count} block(s) ready to save. Counts refresh whenever you return to this window.</source>
-      <translation>{count} manzana(s) lista(s) para guardar. Los conteos se actualizan al volver a esta ventana.</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2404" />
-      <source>{count} parcel(s) ready to save. Counts refresh whenever you return to this window.</source>
-      <translation>{count} parcela(s) lista(s) para guardar. Los conteos se actualizan al volver a esta ventana.</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2421" />
-      <source>Save blocks</source>
-      <translation>Guardar manzanas</translation>
-    </message>
-    <message>
       <location filename="../plugin.py" line="2421" />
       <source>Select at least one layer.</source>
       <translation>Seleccione al menos una capa.</translation>
@@ -301,19 +246,6 @@
       <location filename="../plugin.py" line="2428" />
       <source>  • {layer}: feature id {ids}</source>
       <translation>  • {layer}: id de entidad {ids}</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2435" />
-      <source>These blocks cannot be saved:
-
-{detail}
-
-Complete their required identity fields, then try again.</source>
-      <translation>Estas manzanas no se pueden guardar:
-
-{detail}
-
-Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
     </message>
     <message>
       <location filename="../plugin.py" line="2462" />
@@ -471,49 +403,6 @@ Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
       <translation>Los recortes confirmados de marcadores de números de parcela se guardarán en la carpeta del proyecto QGIS actual. Permanecen en esta computadora y nunca se cargan. Deshabilitar esta opción detiene la recolección futura, pero no elimina las muestras existentes. ¿Habilitar la recolección local?</translation>
     </message>
     <message>
-      <location filename="../plugin.py" line="2213" />
-      <source>Save reviewed parcels</source>
-      <translation>Guardar parcelas revisadas</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2229" />
-      <source>Temporary parcel layers to save</source>
-      <translation>Capas temporales de parcelas para guardar</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2278" />
-      <source>Flash this layer's parcels on the map</source>
-      <translation>Resaltar las parcelas de esta capa en el mapa</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2376" />
-      <source>No temporary parcel layers left. Extract parcels first.</source>
-      <translation>No quedan capas temporales de parcelas. Extraiga parcelas primero.</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2421" />
-      <source>Save parcels</source>
-      <translation>Guardar parcelas</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2435" />
-      <source>Incomplete parcel data</source>
-      <translation>Datos de parcela incompletos</translation>
-    </message>
-    <message>
-      <location filename="../plugin.py" line="2435" />
-      <source>These parcels cannot be saved:
-
-{detail}
-
-Complete their required identity fields, then try again.</source>
-      <translation>Estas parcelas no se pueden guardar:
-
-{detail}
-
-Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
-    </message>
-    <message>
       <source>No temporary parcel or block layers found. Extract first.</source>
       <translation>No se encontraron capas temporales de parcelas o manzanas. Extraiga geometría primero.</translation>
     </message>
@@ -568,6 +457,14 @@ Complete their required identity fields, then try again.</source>
 {detail}
 
 Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
+    </message>
+    <message>
+      <source>Enter a numeric {field} up to {width} digits first.</source>
+      <translation>Ingrese primero una {field} numérica de hasta {width} dígitos.</translation>
+    </message>
+    <message>
+      <source>Updated {field} on {count} selected parcel(s).</source>
+      <translation>Se actualizó {field} en {count} parcela(s) seleccionada(s).</translation>
     </message>
   </context>
 </TS>

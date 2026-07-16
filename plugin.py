@@ -2046,15 +2046,20 @@ class ReviewParcelsDialog(QDialog):
 
     def _apply_bulk(self, key, value, width):
         value = str(value or "").strip()
+        field = tr("section") if key == "sec" else tr("block")
         if not value.isdigit() or len(value) > width:
-            self._hint.setText(f"Enter a numeric {key} up to {width} digits first.")
+            self._hint.setText(tr(
+                "Enter a numeric {field} up to {width} digits first."
+            ).format(field=field, width=width))
             return
         applied = 0
         for row in self._rows:
             if row["selected"].isChecked() and not row["deleted"]:
                 row[key].setText(value.zfill(width))
                 applied += 1
-        self._hint.setText(f"Updated {key} on {applied} selected parcel(s).")
+        self._hint.setText(tr(
+            "Updated {field} on {count} selected parcel(s)."
+        ).format(field=field, count=applied))
 
     def _toggle_delete(self, row_index):
         row = self._rows[row_index]
