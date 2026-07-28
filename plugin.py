@@ -3,6 +3,7 @@ import os
 import sys
 import tempfile
 import traceback
+import warnings
 from datetime import datetime
 
 from qgis.PyQt.QtCore import QCoreApplication, QEvent, QRegularExpression, QSettings, Qt, QThread, pyqtSignal
@@ -40,6 +41,7 @@ from qgis.core import (
     QgsGeometry,
     QgsLineSymbol,
     QgsMapLayer,
+    QgsMessageLog,
     QgsPointXY,
     QgsProject,
     QgsRasterLayer,
@@ -127,25 +129,27 @@ def _dependency_install_message(missing_module: str) -> str:
         + (f"\nNumPy path: {numpy_origin}" if numpy_origin else "")
     )
     numpy_note = (
-        "QGIS supplies NumPy. If NumPy is the missing module, remove any pip-installed "
-        "user copy instead of installing another one, or repair QGIS. The compatible "
-        "OpenCV version cannot be selected until QGIS NumPy imports successfully.\n\n"
+        tr("QGIS supplies NumPy. If NumPy is the missing module, remove any pip-installed "
+           "user copy instead of installing another one, or repair QGIS. The compatible "
+           "OpenCV version cannot be selected until QGIS NumPy imports successfully.") + "\n\n"
         if missing_module == "numpy" or numpy_version is None
         else ""
     )
     command = (
         f'& "{launcher}" -m pip install --user --no-deps {packages}'
         if numpy_version is not None
-        else "Fix the QGIS NumPy import first, then reopen this message."
+        else tr("Fix the QGIS NumPy import first, then reopen this message.")
     )
     return (
-        f"Missing Python module: {missing_module}\n\n"
-        f"{environment}\n\n"
-        f"{numpy_note}"
-        "Close QGIS, run this command in PowerShell, then restart QGIS:\n\n"
-        f"{command}\n\n"
-        "Do not use sys.executable from the QGIS Python Console; it points to "
-        "qgis-bin, not the Python launcher."
+        tr("Missing Python module: {module}").format(module=missing_module)
+        + "\n\n"
+        + f"{environment}\n\n"
+        + numpy_note
+        + tr("Close QGIS, run this command in PowerShell, then restart QGIS:")
+        + "\n\n"
+        + f"{command}\n\n"
+        + tr("Do not use sys.executable from the QGIS Python Console; it points to "
+             "qgis-bin, not the Python launcher.")
     )
 
 
@@ -253,7 +257,7 @@ def _is_temporary_parcel_layer(layer):
         fields.indexOf(name) >= 0
         for name in (
             "id", "cca", "etiqueta", "sec", "mz", "reviewed",
-            "etiqueta_suggestion", "nmp", "fecha",
+            "etiqueta_suggestion", "nmp",
         )
     )
 
@@ -315,7 +319,16 @@ def _bundled_char_reader():
     """Cached (net, classes) for the CNN suggestion reader, or None."""
     global _CHAR_READER
     if _CHAR_READER is False:
-        _CHAR_READER = load_char_reader() if load_char_reader is not None else None
+        if load_char_reader is None:
+            _CHAR_READER = None
+        else:
+            # load_reader signals partial/stale ensemble deploys via warnings.warn,
+            # invisible in QGIS — surface them in the message log
+            with warnings.catch_warnings(record=True) as wlist:
+                warnings.simplefilter("always")
+                _CHAR_READER = load_char_reader()
+            for w in wlist:
+                QgsMessageLog.logMessage(str(w.message), "Relex Geoplan", Qgis.Warning)
     return _CHAR_READER
 
 
@@ -499,8 +512,9 @@ def _assign_etiquetas_result(result, settings, geotransform, array):
                     elif s:
                         suggestions[i] = s
                 if read_count:
-                    note = (f" {read_count}/{len(valid)} parcel number(s) read from "
-                            "the circled markers — verify on the map.")
+                    note = tr(" {n}/{total} parcel number(s) read from the "
+                              "circled markers — verify on the map.").format(
+                                  n=read_count, total=len(valid))
             except Exception:
                 pass
     out = dict(result)
@@ -607,7 +621,7 @@ class ParcelGeometryPlugin:
         click while a tool is active cancels it (toggle behaviour).
         """
         if self.tool is not None:
-            self.cancel_rectangle_tool("Selection cancelled.")
+            self.cancel_rectangle_tool(tr("Selection cancelled."))
             return
 
         selected = self._selected_raster()
@@ -634,7 +648,7 @@ class ParcelGeometryPlugin:
             lambda points: self.extract_from_polygon(layer, path, points)
         )
         self.tool.cancelled.connect(
-            lambda: self.cancel_rectangle_tool("Polygon selection cancelled.")
+            lambda: self.cancel_rectangle_tool(tr("Polygon selection cancelled."))
         )
         self.iface.mapCanvas().setMapTool(self.tool)
         self.action.setChecked(True)
@@ -645,7 +659,7 @@ class ParcelGeometryPlugin:
         if _MISSING_DEPENDENCY is not None:
             QMessageBox.critical(
                 self.iface.mainWindow(),
-                "Relex Geoplan dependencies missing",
+                tr("Relex Geoplan dependencies missing"),
                 _dependency_install_message(_MISSING_DEPENDENCY),
             )
             return None
@@ -654,7 +668,7 @@ class ParcelGeometryPlugin:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Relex Geoplan",
-                "Select exactly one raster layer: the georeferenced TIFF.",
+                tr("Select exactly one raster layer: the georeferenced TIFF."),
             )
             return None
         layer = selected[0]
@@ -667,7 +681,7 @@ class ParcelGeometryPlugin:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Relex Geoplan",
-                "The selected raster is not a local GDAL-readable TIFF.",
+                tr("The selected raster is not a local GDAL-readable TIFF."),
             )
             return None
         return layer, path
@@ -736,7 +750,7 @@ class ParcelGeometryPlugin:
             QMessageBox.warning(
                 self.iface.mainWindow(),
                 "Relex Geoplan",
-                "Selected polygon does not overlap the raster.",
+                tr("Selected polygon does not overlap the raster."),
             )
             self.cancel_rectangle_tool()
             return
@@ -759,7 +773,7 @@ class ParcelGeometryPlugin:
         self._worker_settings = settings
         self._worker_geotransform = geotransform
         self._worker_path = path
-        self.iface.messageBar().pushInfo("Relex Geoplan", "Extracting parcel lines…")
+        self.iface.messageBar().pushInfo("Relex Geoplan", tr("Extracting parcel lines…"))
 
         self.worker = ExtractionWorker(
             array, geotransform, roi, settings, polygon_world
@@ -777,7 +791,7 @@ class ParcelGeometryPlugin:
             QMessageBox.critical(
                 self.iface.mainWindow(),
                 "Relex Geoplan",
-                f"Failed to build the output layers:\n{traceback.format_exc()}",
+                tr("Failed to build the output layers:") + f"\n{traceback.format_exc()}",
             )
             self.worker = None
             self._worker_layer = None
@@ -844,8 +858,7 @@ class ParcelGeometryPlugin:
                 f"&field=mz:string(4)"
                 f"&field=reviewed:integer"
                 f"&field=etiqueta_suggestion:string(50)"
-                f"&field=nmp:string(50)"
-                f"&field=fecha:string(50)",
+                f"&field=nmp:string(50)",
                 f"[Pc] {layer_name}",
                 "memory",
             )
@@ -882,14 +895,13 @@ class ParcelGeometryPlugin:
                         (len(harvest_rings) - 1, etiqueta, etiqueta_source)
                     )
                 nmp = plano_meta.get("nmp", "")
-                fecha = plano_meta.get("fecha", "")
                 feature = QgsFeature()
                 feature.setFields(vector_layer.fields())
                 feature.setGeometry(geom)
                 feature.setAttributes(
                     [
                         idx, geom.area(), vertices, cca, etiqueta, sec, mz, 0,
-                        suggestions_full[orig_idx], nmp, fecha,
+                        suggestions_full[orig_idx], nmp,
                     ]
                 )
                 features.append(feature)
@@ -906,21 +918,21 @@ class ParcelGeometryPlugin:
 
             expected = _expected_count(settings)
             if not output_layers:
-                msg = (
+                msg = tr(
                     "No parcel found. The drawn boundary may be faint or broken — try "
                     "'Recover weak shared boundaries', lower the line width, or draw the "
                     "selection tighter around a single parcel."
                 )
             elif expected and len(features) < expected:
-                msg = (
-                    f"Added {len(features)} of {expected} expected parcel(s) "
-                    f"({total_area:.1f} m² total). For faint shared edges, enable "
-                    "'Recover weak shared boundaries'."
-                )
+                msg = tr(
+                    "Added {n} of {expected} expected parcel(s) ({area:.1f} m² total). "
+                    "For faint shared edges, enable 'Recover weak shared boundaries'."
+                ).format(n=len(features), expected=expected, area=total_area)
             else:
-                msg = (f"Added {len(features)} parcel(s) in one layer "
-                       f"({total_area:.1f} m² total). Review cadastral values before saving."
-                       f"{spatial_note}")
+                msg = tr(
+                    "Added {n} parcel(s) in one layer ({area:.1f} m² total). "
+                    "Review cadastral values before saving."
+                ).format(n=len(features), area=total_area) + spatial_note
 
             if settings.get("debug_layers"):
                 self._add_debug_line_layer(world_lines, crs_id, display_line_width_mm, layer_name)
@@ -955,7 +967,7 @@ class ParcelGeometryPlugin:
             )
             vector_layer.setRenderer(QgsSingleSymbolRenderer(symbol))
             output_layers.append(vector_layer)
-            msg = f"Added {len(features)} candidate lines."
+            msg = tr("Added {n} candidate lines.").format(n=len(features))
 
         if settings.get("debug_layers") and "debug" in result:
             self._load_debug_layers(result, geotransform, crs)
@@ -984,15 +996,15 @@ class ParcelGeometryPlugin:
         rings = [r for r in result.get("polygons", []) if len(r) >= 3]
         geoms = [g for g in (self._ring_to_geom(ring) for ring in rings) if g is not None]
         if not geoms:
-            return None, ("No block outline found. Draw the selection around "
-                          "one block; a faint boundary may need a lower line width.")
+            return None, tr("No block outline found. Draw the selection around "
+                            "one block; a faint boundary may need a lower line width.")
         geom = QgsGeometry.unaryUnion(geoms)
         if geom.isEmpty() or geom.isMultipart():
-            return None, ("The detected parcels do not form one connected block. "
-                          "Adjust the selection and extract again.")
+            return None, tr("The detected parcels do not form one connected block. "
+                            "Adjust the selection and extract again.")
         polygon = geom.asPolygon()
         if not polygon or not polygon[0]:
-            return None, "The joined block outline is invalid."
+            return None, tr("The joined block outline is invalid.")
         # interior rings mean the union had holes = parcels the extraction
         # missed; the outline is still built but the user must be told
         dropped_holes = len(polygon) > 1
@@ -1028,14 +1040,18 @@ class ParcelGeometryPlugin:
         layer.updateExtents()
         layer.setRenderer(QgsSingleSymbolRenderer(_parcel_fill_symbol()))
         if codigo:
-            msg = (f"Added block {codigo} outline ({geom.area():.1f} m²). Select "
-                   "a blocks (manzanas) layer in the Layers panel and use the save button.")
+            msg = tr(
+                "Added block {code} outline ({area:.1f} m²). Select a blocks (manzanas) "
+                "layer in the Layers panel and use the save button."
+            ).format(code=codigo, area=geom.area())
         else:
-            msg = ("Added block outline, but the cadastral designation is incomplete — "
-                   "fill dep/mun/sec/chac/mz before saving (the block code is empty).")
+            msg = tr(
+                "Added block outline, but the cadastral designation is incomplete — "
+                "fill dep/mun/sec/chac/mz before saving (the block code is empty)."
+            )
         if dropped_holes:
-            msg += (" Warning: the joined parcels left interior gaps (undetected "
-                    "parcels?) that were filled — verify the outline on the map.")
+            msg += tr(" Warning: the joined parcels left interior gaps (undetected "
+                      "parcels?) that were filled — verify the outline on the map.")
         return layer, msg
 
     def _harvest_store_dir(self):
@@ -1128,7 +1144,7 @@ class ParcelGeometryPlugin:
         array, gt = harvest_ctx
         if array is None or gt is None:
             self.iface.messageBar().pushWarning(
-                "Relex Geoplan", "Marker picking is unavailable after raster cleanup."
+                "Relex Geoplan", tr("Marker picking is unavailable after raster cleanup.")
             )
             return
         self._cancel_marker_pick()
@@ -1138,7 +1154,7 @@ class ParcelGeometryPlugin:
         self._marker_pick_previous_tool = canvas.mapTool()
         self.iface.messageBar().pushInfo(
             "Relex Geoplan",
-            "Click the number, or drag a box around the marker if clicking misses."
+            tr("Click the number, or drag a box around the marker if clicking misses.")
         )
 
         def to_px(x, y):
@@ -1160,7 +1176,7 @@ class ParcelGeometryPlugin:
         def finish(got, pick=None):
             if got is None:
                 self.iface.messageBar().pushWarning(
-                    "Relex Geoplan", "No marker crop could be made from that pick."
+                    "Relex Geoplan", tr("No marker crop could be made from that pick.")
                 )
             else:
                 dialog.set_picked_disk(row_index, got[0], pick)
@@ -1227,8 +1243,8 @@ class ParcelGeometryPlugin:
         if getattr(self, "_fill_dialog", None) is not None:
             self.iface.messageBar().pushWarning(
                 "Relex Geoplan",
-                "Another parcel review is open. Finish or close it, then use "
-                "'Review extracted parcels' on this temporary layer.",
+                tr("Another parcel review is open. Finish or close it, then use "
+                   "'Review extracted parcels' on this temporary layer."),
             )
             return
         dialog = ReviewParcelsDialog(self.iface.mainWindow(), self.iface, layer, rows)
@@ -1300,7 +1316,8 @@ class ParcelGeometryPlugin:
             return  # layer was deleted while the dialog was open
         self.iface.messageBar().pushInfo(
             "Relex Geoplan",
-            f"Reviewed {len(changes)} parcel(s); deleted {len(deleted)} temporary parcel(s).",
+            tr("Reviewed {changes} parcel(s); deleted {deleted} temporary parcel(s).").format(
+                changes=len(changes), deleted=len(deleted)),
         )
         # flywheel: a user-typed number is the strongest label — harvest it
         geom_by_fid = {row["fid"]: row["geom"] for row in rows}
@@ -1363,7 +1380,6 @@ class ParcelGeometryPlugin:
                     "chac": prefix[7:11], "mz": prefix[11:15],
                 })
             meta["nmp"] = str(feature["nmp"] or "").strip()
-            meta["fecha"] = str(feature["fecha"] or "").strip()
         raster_context = None
         source_path = str(
             layer.customProperty("parcel_geometry/source_path", "") or ""
@@ -1380,8 +1396,8 @@ class ParcelGeometryPlugin:
         if self._fill_dialog is not None:
             self.iface.messageBar().pushWarning(
                 "Relex Geoplan",
-                "Another review is open. Finish or close it, then use "
-                "'Review extracted geometry' on this temporary layer.",
+                tr("Another review is open. Finish or close it, then use "
+                   "'Review extracted geometry' on this temporary layer."),
             )
             return
         features = list(layer.getFeatures())
@@ -1484,7 +1500,8 @@ class ParcelGeometryPlugin:
             return False
         self.iface.messageBar().pushInfo(
             "Relex Geoplan",
-            f"Saved {count} feature(s) to project layer '{db_layer.name()}'.",
+            tr("Saved {count} feature(s) to project layer '{layer}'.").format(
+                count=count, layer=db_layer.name()),
         )
         try:
             db_layer.reload()
@@ -1606,13 +1623,13 @@ class ParcelGeometryPlugin:
     def _append_to_parcelas_layer(self, db_layer, records):
         """Append records through the selected project layer provider."""
         if not _is_publish_destination_layer(db_layer):
-            return 0, "The selected destination layer is no longer available."
+            return 0, tr("The selected destination layer is no longer available.")
         fields = db_layer.fields()
         now = datetime.now().isoformat(sep=" ", timespec="seconds")
         features = []
         for geom, attrs, src_crs in records:
             if not src_crs.isValid():
-                return 0, "A temporary extraction layer has no valid CRS."
+                return 0, tr("A temporary extraction layer has no valid CRS.")
             g = QgsGeometry(geom)
             attrs = dict(attrs)
             if db_layer.crs() != src_crs:
@@ -1621,9 +1638,9 @@ class ParcelGeometryPlugin:
                         src_crs, db_layer.crs(), QgsProject.instance()
                     )
                     if g.transform(transform) != 0:
-                        return 0, "CRS transform to the destination layer failed."
+                        return 0, tr("CRS transform to the destination layer failed.")
                 except Exception:
-                    return 0, "CRS transform to the destination layer failed."
+                    return 0, tr("CRS transform to the destination layer failed.")
             attrs.setdefault("ara", round(g.area(), 2))
             attrs.setdefault("st_length_", round(g.constGet().perimeter(), 2))
             attrs["created_at"] = now                 # when the parcel row was created
@@ -1637,7 +1654,7 @@ class ParcelGeometryPlugin:
             features.append(feature)
         ok, _ = db_layer.dataProvider().addFeatures(features)
         if not ok:
-            return 0, "Saving to the selected destination layer failed."
+            return 0, tr("Saving to the selected destination layer failed.")
         db_layer.updateExtents()
         return len(features), None
 
@@ -1709,14 +1726,14 @@ class ParcelGeometryPlugin:
             )
             if not rl.isValid():
                 self.iface.messageBar().pushWarning(
-                    "Relex Geoplan", f"Debug layer {name} failed to load."
+                    "Relex Geoplan", tr("Debug layer {name} failed to load.").format(name=name)
                 )
 
     def _on_extraction_error(self, msg):
         QMessageBox.critical(
             self.iface.mainWindow(),
             "Relex Geoplan",
-            f"Extraction failed:\n{msg}",
+            tr("Extraction failed:") + f"\n{msg}",
         )
         self.worker = None
         self._worker_layer = None
@@ -1951,7 +1968,7 @@ class ReviewParcelsDialog(QDialog):
                 QRegularExpression(r"^(\d{0,4}|\d{0,3}[A-Za-zÑñ])$")))
             edit.setText(parcel["etiqueta"])
             if parcel["suggestion"] and not parcel["etiqueta"]:
-                edit.setPlaceholderText(f"suggestion: {parcel['suggestion']}")
+                edit.setPlaceholderText(tr("suggestion: {text}").format(text=parcel['suggestion']))
             edit.editingFinished.connect(lambda e=edit: self._pad_etiqueta_field(e))
             edit.returnPressed.connect(self._focus_next_edit)
             grid.addWidget(edit, r, 3)
@@ -2029,7 +2046,7 @@ class ReviewParcelsDialog(QDialog):
                     field.setStyleSheet("")
         if bad:
             self._hint.setText(
-                "Fix invalid parcel number/section/block values: " + ", ".join(bad)
+                tr("Fix invalid parcel number/section/block values: ") + ", ".join(bad)
             )
             return
         self.accept()
@@ -2081,9 +2098,9 @@ class ReviewParcelsDialog(QDialog):
 
     def _request_pick(self, row_index):
         if self._pick_cb is None:
-            self._hint.setText("Marker picking is not available for this extraction.")
+            self._hint.setText(tr("Marker picking is not available for this extraction."))
             return
-        self._hint.setText("Click the number, or drag a box around the marker.")
+        self._hint.setText(tr("Click the number, or drag a box around the marker."))
         self._pick_cb(row_index)
 
     def set_picked_disk(self, row_index, disk, pick=None):
@@ -2094,7 +2111,7 @@ class ReviewParcelsDialog(QDialog):
         row["pick"] = pick  # raster location of the user's pick (gold detector label)
         self._set_thumb(row["thumb"], _disk_to_pixmap(disk))
         row["edit"].setFocus()
-        self._hint.setText("Picked marker crop for this parcel. Type its number, then Save.")
+        self._hint.setText(tr("Picked marker crop for this parcel. Type its number, then Save."))
 
     def picked_disks(self):
         return {row["fid"]: row["disk"] for row in self._rows
@@ -2426,8 +2443,6 @@ class ExtractionSettingsDialog(QDialog):
         # Per-plano attributes (pre-filled from sidecar/filename, saved back to sidecar).
         self.meta_nmp = QLineEdit(meta.get("nmp", ""))
         self.meta_nmp.setToolTip(tr("Survey plan number from the registry stamp."))
-        self.meta_fecha = QLineEdit(meta.get("fecha", ""))
-        self.meta_fecha.setPlaceholderText("YYYY-MM-DD")
         self.meta_parts = {}
         nomenclatura = QHBoxLayout()
         for key, label, width in (
@@ -2552,7 +2567,6 @@ class ExtractionSettingsDialog(QDialog):
         meta_form = QFormLayout()
         meta_form.addRow(tr("Survey plan number (nmp)"), self.meta_nmp)
         meta_form.addRow(tr("Cadastral designation"), nomenclatura)
-        meta_form.addRow(tr("Date"), self.meta_fecha)
         meta_form.addRow(tr("Parcel number(s)"), self.etiquetas)
         self.meta_status = QLabel()
         self.meta_status.setTextFormat(Qt.RichText)
@@ -2560,9 +2574,9 @@ class ExtractionSettingsDialog(QDialog):
         meta_group = QGroupBox(tr("Cadastral attributes (database)"))
         meta_group.setLayout(meta_form)
 
-        # live readiness: nmp / cca-prefix / fecha as ✓ or ✗, and whether
-        # publish would be blocked — surfaced BEFORE extraction, not after.
-        for w in (self.meta_nmp, self.meta_fecha, *self.meta_parts.values()):
+        # live readiness: nmp / cca-prefix as ✓ or ✗, and whether publish would
+        # be blocked — surfaced BEFORE extraction, not after.
+        for w in (self.meta_nmp, *self.meta_parts.values()):
             w.textChanged.connect(self._update_meta_status)
         self._update_meta_status()
         self._update_mode_controls(self.manzana_mode.isChecked())
@@ -2584,7 +2598,6 @@ class ExtractionSettingsDialog(QDialog):
         out: the cca prefix (nomenclatura through manzana) must be complete or
         no parcel can get a full cca."""
         m = {"nmp": self.meta_nmp.text().strip(),
-             "fecha": self.meta_fecha.text().strip(),
              **{k: e.text().strip() for k, e in self.meta_parts.items()}}
         prefix = build_codigo(m)
 
@@ -2601,7 +2614,6 @@ class ExtractionSettingsDialog(QDialog):
                        if not (m[k].isdigit() and 0 < len(m[k]) <= w)]
             lines.append(row(False, "cca prefix",
                              "incomplete: " + ", ".join(missing)))
-        lines.append(row(bool(m["fecha"]), "date", m["fecha"] or "missing"))
         if prefix:
             if self.manzana_mode.isChecked():
                 lines.append("<i style='color:#1e9e5a'>Block code is publish-ready.</i>")
@@ -2667,7 +2679,6 @@ class ExtractionSettingsDialog(QDialog):
             # per-raster values: persisted in the tiff sidecar, not QSettings
             "plano_meta": {
                 "nmp": self.meta_nmp.text().strip(),
-                "fecha": self.meta_fecha.text().strip(),
                 **{k: e.text().strip() for k, e in self.meta_parts.items()},
             },
             "etiquetas": [

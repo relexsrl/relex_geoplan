@@ -5,9 +5,9 @@ chain of adjacent parcels, blocks in reading order. So the typed list (sorted
 naturally: 220,221,...,237 / 320E,320F,320G) is mapped onto the polygons'
 spatial order instead of the meaningless extraction-index order.
 
-Validated on ground truth (scratch/proto_order_assign.py): chains 100 %
-(the 18-parcel curved ribbon included), regular blocks high, irregular fan
-layouts imperfect — the user verifies on the map either way.
+Validated on ground truth: chains 100 % (the 18-parcel curved ribbon
+included), regular blocks high, irregular fan layouts imperfect — the user
+verifies on the map either way.
 """
 import re
 

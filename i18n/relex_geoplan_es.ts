@@ -466,5 +466,173 @@ Complete los campos de identidad requeridos y vuelva a intentarlo.</translation>
       <source>Updated {field} on {count} selected parcel(s).</source>
       <translation>Se actualizó {field} en {count} parcela(s) seleccionada(s).</translation>
     </message>
+    <message>
+      <source>Selection cancelled.</source>
+      <translation>Selección cancelada.</translation>
+    </message>
+    <message>
+      <source>Polygon selection cancelled.</source>
+      <translation>Selección de polígono cancelada.</translation>
+    </message>
+    <message>
+      <source>Relex Geoplan dependencies missing</source>
+      <translation>Faltan dependencias de Relex Geoplan</translation>
+    </message>
+    <message>
+      <source>QGIS supplies NumPy. If NumPy is the missing module, remove any pip-installed user copy instead of installing another one, or repair QGIS. The compatible OpenCV version cannot be selected until QGIS NumPy imports successfully.</source>
+      <translation>QGIS provee NumPy. Si el módulo faltante es NumPy, elimine cualquier copia instalada con pip en el usuario en lugar de instalar otra, o repare QGIS. No se puede seleccionar la versión compatible de OpenCV hasta que NumPy de QGIS se importe correctamente.</translation>
+    </message>
+    <message>
+      <source>Fix the QGIS NumPy import first, then reopen this message.</source>
+      <translation>Primero corrija la importación de NumPy de QGIS, luego vuelva a abrir este mensaje.</translation>
+    </message>
+    <message>
+      <source>Missing Python module: {module}</source>
+      <translation>Falta el módulo de Python: {module}</translation>
+    </message>
+    <message>
+      <source>Close QGIS, run this command in PowerShell, then restart QGIS:</source>
+      <translation>Cierre QGIS, ejecute este comando en PowerShell y reinicie QGIS:</translation>
+    </message>
+    <message>
+      <source>Do not use sys.executable from the QGIS Python Console; it points to qgis-bin, not the Python launcher.</source>
+      <translation>No use sys.executable desde la consola de Python de QGIS; apunta a qgis-bin, no al lanzador de Python.</translation>
+    </message>
+    <message>
+      <source>Select exactly one raster layer: the georeferenced TIFF.</source>
+      <translation>Seleccione exactamente una capa ráster: el TIFF georreferenciado.</translation>
+    </message>
+    <message>
+      <source>The selected raster is not a local GDAL-readable TIFF.</source>
+      <translation>El ráster seleccionado no es un TIFF local legible por GDAL.</translation>
+    </message>
+    <message>
+      <source>Selected polygon does not overlap the raster.</source>
+      <translation>El polígono seleccionado no se superpone con el ráster.</translation>
+    </message>
+    <message>
+      <source>Extracting parcel lines…</source>
+      <translation>Extrayendo líneas de parcela…</translation>
+    </message>
+    <message>
+      <source>Failed to build the output layers:</source>
+      <translation>No se pudieron construir las capas de salida:</translation>
+    </message>
+    <message>
+      <source> {n}/{total} parcel number(s) read from the circled markers — verify on the map.</source>
+      <translation> {n}/{total} número(s) de parcela leído(s) de los marcadores circulados — verifique en el mapa.</translation>
+    </message>
+    <message>
+      <source>No parcel found. The drawn boundary may be faint or broken — try 'Recover weak shared boundaries', lower the line width, or draw the selection tighter around a single parcel.</source>
+      <translation>No se encontró ninguna parcela. El límite dibujado puede estar tenue o roto: pruebe 'Recuperar límites compartidos débiles', reduzca el ancho de línea o dibuje la selección más ajustada alrededor de una sola parcela.</translation>
+    </message>
+    <message>
+      <source>Added {n} of {expected} expected parcel(s) ({area:.1f} m² total). For faint shared edges, enable 'Recover weak shared boundaries'.</source>
+      <translation>Se agregaron {n} de {expected} parcela(s) esperada(s) ({area:.1f} m² en total). Para bordes compartidos tenues, active 'Recuperar límites compartidos débiles'.</translation>
+    </message>
+    <message>
+      <source>Added {n} parcel(s) in one layer ({area:.1f} m² total). Review cadastral values before saving.</source>
+      <translation>Se agregaron {n} parcela(s) en una capa ({area:.1f} m² en total). Revise los valores catastrales antes de guardar.</translation>
+    </message>
+    <message>
+      <source>Added {n} candidate lines.</source>
+      <translation>Se agregaron {n} líneas candidatas.</translation>
+    </message>
+    <message>
+      <source>Added block {code} outline ({area:.1f} m²). Select a blocks (manzanas) layer in the Layers panel and use the save button.</source>
+      <translation>Se agregó el contorno de la manzana {code} ({area:.1f} m²). Seleccione una capa de manzanas en el panel de Capas y use el botón de guardar.</translation>
+    </message>
+    <message>
+      <source>Added block outline, but the cadastral designation is incomplete — fill dep/mun/sec/chac/mz before saving (the block code is empty).</source>
+      <translation>Se agregó el contorno de la manzana, pero la nomenclatura catastral está incompleta: complete dep/mun/sec/chac/mz antes de guardar (el código de manzana está vacío).</translation>
+    </message>
+    <message>
+      <source> Warning: the joined parcels left interior gaps (undetected parcels?) that were filled — verify the outline on the map.</source>
+      <translation> Advertencia: las parcelas unidas dejaron huecos interiores (¿parcelas no detectadas?) que se rellenaron — verifique el contorno en el mapa.</translation>
+    </message>
+    <message>
+      <source>Marker picking is unavailable after raster cleanup.</source>
+      <translation>La selección de marcador no está disponible después de la limpieza del ráster.</translation>
+    </message>
+    <message>
+      <source>Click the number, or drag a box around the marker if clicking misses.</source>
+      <translation>Haga clic en el número, o arrastre un recuadro alrededor del marcador si el clic falla.</translation>
+    </message>
+    <message>
+      <source>No marker crop could be made from that pick.</source>
+      <translation>No se pudo generar un recorte de marcador a partir de esa selección.</translation>
+    </message>
+    <message>
+      <source>Another parcel review is open. Finish or close it, then use 'Review extracted parcels' on this temporary layer.</source>
+      <translation>Ya hay otra revisión de parcelas abierta. Termínela o ciérrela, luego use 'Revisar parcelas extraídas' en esta capa temporal.</translation>
+    </message>
+    <message>
+      <source>Reviewed {changes} parcel(s); deleted {deleted} temporary parcel(s).</source>
+      <translation>Se revisaron {changes} parcela(s); se eliminaron {deleted} parcela(s) temporal(es).</translation>
+    </message>
+    <message>
+      <source>Another review is open. Finish or close it, then use 'Review extracted geometry' on this temporary layer.</source>
+      <translation>Ya hay otra revisión abierta. Termínela o ciérrela, luego use 'Revisar geometría extraída' en esta capa temporal.</translation>
+    </message>
+    <message>
+      <source>Saved {count} feature(s) to project layer '{layer}'.</source>
+      <translation>Se guardaron {count} entidad(es) en la capa del proyecto '{layer}'.</translation>
+    </message>
+    <message>
+      <source>Debug layer {name} failed to load.</source>
+      <translation>La capa de diagnóstico {name} no se pudo cargar.</translation>
+    </message>
+    <message>
+      <source>Extraction failed:</source>
+      <translation>La extracción falló:</translation>
+    </message>
+    <message>
+      <source>suggestion: {text}</source>
+      <translation>sugerencia: {text}</translation>
+    </message>
+    <message>
+      <source>Fix invalid parcel number/section/block values: </source>
+      <translation>Corrija los valores inválidos de número de parcela/sección/manzana: </translation>
+    </message>
+    <message>
+      <source>Marker picking is not available for this extraction.</source>
+      <translation>La selección de marcador no está disponible para esta extracción.</translation>
+    </message>
+    <message>
+      <source>Click the number, or drag a box around the marker.</source>
+      <translation>Haga clic en el número, o arrastre un recuadro alrededor del marcador.</translation>
+    </message>
+    <message>
+      <source>Picked marker crop for this parcel. Type its number, then Save.</source>
+      <translation>Recorte de marcador seleccionado para esta parcela. Escriba su número y luego guarde.</translation>
+    </message>
+    <message>
+      <source>The joined block outline is invalid.</source>
+      <translation>El contorno de manzana unido no es válido.</translation>
+    </message>
+    <message>
+      <source>The selected destination layer is no longer available.</source>
+      <translation>La capa de destino seleccionada ya no está disponible.</translation>
+    </message>
+    <message>
+      <source>A temporary extraction layer has no valid CRS.</source>
+      <translation>Una capa temporal de extracción no tiene un SRC válido.</translation>
+    </message>
+    <message>
+      <source>CRS transform to the destination layer failed.</source>
+      <translation>Falló la transformación de SRC a la capa de destino.</translation>
+    </message>
+    <message>
+      <source>Saving to the selected destination layer failed.</source>
+      <translation>Falló el guardado en la capa de destino seleccionada.</translation>
+    </message>
+    <message>
+      <source>No block outline found. Draw the selection around one block; a faint boundary may need a lower line width.</source>
+      <translation>No se encontró contorno de manzana. Dibuje la selección alrededor de una manzana; un límite tenue puede requerir un ancho de línea menor.</translation>
+    </message>
+    <message>
+      <source>The detected parcels do not form one connected block. Adjust the selection and extract again.</source>
+      <translation>Las parcelas detectadas no forman una manzana conectada. Ajuste la selección y extraiga de nuevo.</translation>
+    </message>
   </context>
 </TS>

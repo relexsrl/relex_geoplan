@@ -1,13 +1,13 @@
 """OpenCV-based parcel extraction workflow.
 
-Pipeline (PLAN.md §10, validated 2026-06-26):
+Pipeline (validated 2026-06-26):
   1. Binarize (Otsu) inside the ROI.
   2. Stage C — separate parcel-boundary strokes from dimension/text ink via
      opening-by-reconstruction + a connected-component text filter.
   3. Stage A — clip to the user polygon, dilated so boundary strokes survive.
   4. Bridge dash gaps so dashed boundaries form one line.
   5. Detect lines, de-duplicate collinear ones, and extract parcel faces from
-     their noded planar arrangement (PLAN.md §10).
+     their noded planar arrangement.
 
 The user draws a polygon ROI around the parcel(s) — it defines the analysis
 area, not the parcel vertices, which are found automatically. The domain is
@@ -514,7 +514,7 @@ def _separate_strokes(mask: np.ndarray, line_width_px: float) -> np.ndarray:
 
     Opening-by-reconstruction removes thin dimension/text strokes while keeping
     boundaries whole; a connected-component pass drops residual compact text.
-    Replaces the weaker stroke-width percentile filter (PLAN.md D20/§10-C).
+    Replaces the weaker stroke-width percentile filter.
     """
     radius = max(1, int(round(line_width_px * 0.4)))
     boundary = _open_by_reconstruction(mask, radius)
@@ -746,8 +746,8 @@ def _arrangement_faces(
 ) -> tuple[list[PointRing], list[PointRing]]:
     """Extract parcel faces from a noded planar arrangement of detected lines.
 
-    The planar-arrangement engine (docs/investigation.md, PLAN.md §10): each detected
-    segment is extended at both ends by a bounded corner-closing margin so adjacent
+    The planar-arrangement engine: each detected segment is extended at both
+    ends by a bounded corner-closing margin so adjacent
     boundary lines cross and corners close; all segments are then *noded* together
     (``unary_union`` splits every crossing into shared vertices) and ``polygonize``
     extracts the bounded faces. Noding is the step ``shapely.polygonize`` needs but

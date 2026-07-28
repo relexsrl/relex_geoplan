@@ -4,7 +4,7 @@ Every etiqueta the user confirms — typed at extraction or filled in the
 post-extraction dialog — identifies exactly one handwritten marker on one
 plano. This module crops that marker's disk and appends it to a local store,
 so normal daily use grows the labeled training set that gates every measured
-reader route (see docs/ocr_training_improvement_research.md VERDICT).
+reader route.
 
 Store layout (the plugin puts it in the QGIS project folder, never shipped):
     etiqueta_harvest/

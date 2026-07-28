@@ -88,6 +88,15 @@ def load_reader(onnx_path=BUNDLED, sidecar_path=None):
                 warnings.warn(f"char_reader ensemble members missing: {missing}")
                 return None
             return _EnsembleNet([cv2.dnn.readNetFromONNX(p) for p in paths]), classes
+        stem = os.path.splitext(os.path.basename(onnx_path))[0] + "_"
+        strays = sorted(n for n in os.listdir(os.path.dirname(onnx_path) or ".")
+                        if n.startswith(stem) and n.endswith(".onnx"))
+        if strays:
+            # stale sidecar (no ``members``) beside ensemble member files: the
+            # converse partial deploy — loading one seed would silently replace
+            # the validated zero-wrong ensemble
+            warnings.warn(f"char_reader sidecar lists no members but member ONNX exist: {strays}")
+            return None
         net = cv2.dnn.readNetFromONNX(onnx_path)
     except Exception:
         return None

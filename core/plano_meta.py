@@ -2,9 +2,11 @@
 
 The plano metadata (nmp = registro number, cadastral nomenclatura components,
 fecha) is captured once per raster and stored in a ``<tiff>.meta.json`` sidecar.
-The filename pattern ``NNNNNN#DD-MM-SSS-CCCC-MMMM#YYYYMMDD#...`` is only a
-best-effort pre-fill; the authoritative values are printed on the plano itself
-(registro stamp + NOMENCLATURA CATASTRAL table) and remain user-editable.
+The filename pattern ``NNNNNN#DD-MM-SSS-CCCC-MMMM#...`` is only a best-effort
+pre-fill; the authoritative values are printed on the plano itself (registro
+stamp + NOMENCLATURA CATASTRAL table) and remain user-editable. Parsing stops
+after the nomenclatura (the cca prefix); anything after it — including the plano
+date — is intentionally ignored (the date is no longer used).
 """
 import json
 import re
@@ -17,15 +19,16 @@ META_KEYS = ("nmp", "dep", "mun", "sec", "chac", "mz", "fecha")
 
 _FILENAME_RE = re.compile(
     r"^(?P<nmp>\d+)#"
-    r"(?P<dep>\d{2})-(?P<mun>\d{2})-(?P<sec>\d{3})-(?P<chac>\d{4})-(?P<mz>\d{4})#"
-    r"(?P<date>\d{8})#"
+    r"(?P<dep>\d{2})-(?P<mun>\d{2})-(?P<sec>\d{3})-(?P<chac>\d{4})-(?P<mz>\d{4})"
+    r"(?=#|$)"  # bound the block number; stop here — don't parse the date
 )
 def parse_filename(name):
-    """Pre-fill metadata from a plano filename; {} when it doesn't match."""
+    """Pre-fill metadata from a plano filename; {} when it doesn't match.
+    Only nmp + nomenclatura (through the cca prefix) are parsed; anything after
+    the block number, including the plano date, is ignored."""
     m = _FILENAME_RE.match(name)
     if not m:
         return {}
-    d = m.group("date")
     return {
         "nmp": m.group("nmp").lstrip("0") or "0",
         "dep": m.group("dep"),
@@ -33,7 +36,6 @@ def parse_filename(name):
         "sec": m.group("sec"),
         "chac": m.group("chac"),
         "mz": m.group("mz"),
-        "fecha": f"{d[:4]}-{d[4:6]}-{d[6:]}",
     }
 
 
