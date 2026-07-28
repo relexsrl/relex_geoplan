@@ -8,6 +8,7 @@ author=Relex
 email=contacto@relex.ar
 homepage=https://github.com/relexsrl/relex_geoplan
 repository=https://github.com/relexsrl/relex_geoplan
+tracker=https://github.com/relexsrl/relex_geoplan/issues
 category=Raster
 icon=icon.svg
 experimental=True
