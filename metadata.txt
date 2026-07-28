@@ -1,14 +1,14 @@
 [general]
 name=Relex Geoplan
 qgisMinimumVersion=3.22
-description=Extract parcel polygons from a georeferenced plano TIFF
-about=Extracts parcel polygons from a georeferenced plano image using a line-arrangement CV pipeline, with per-parcel review and save-to-parcelas-layer workflow. Core logic is QGIS-agnostic.
-version=0.0.0
+description=Extract parcel and block polygons from georeferenced survey-plan TIFFs. Requires separately installed scipy, shapely and opencv-contrib-python-headless. Tested on QGIS 3.44.11 LTR/Windows 64-bit.
+about=Relex Geoplan extracts parcel and block polygons locally from georeferenced survey-plan TIFFs. External Python runtime dependencies are scipy>=1.7, shapely>=1.8 and a NumPy-compatible opencv-contrib-python-headless version. QGIS does not install these libraries automatically; see the README installation guide. Minimum declared QGIS version is 3.22; currently tested on QGIS 3.44.11 LTR on Windows 64-bit.
+version=0.1.0
 author=Relex
 email=contacto@relex.ar
 homepage=https://github.com/relexsrl/relex_geoplan
 repository=https://github.com/relexsrl/relex_geoplan
-category=Plugins
+category=Raster
 icon=icon.svg
 experimental=True
 deprecated=False
