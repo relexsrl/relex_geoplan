@@ -48,7 +48,6 @@ DIGITS = set("0123456789")
 FREE_ACCEPT = 200.0
 
 
-# ---------------------------------------------------------------- glyphs
 
 def norm_glyph(img):
     """Canonical glyph: minority-class ink, stroke-closed, size-normalized,
@@ -166,7 +165,6 @@ def _sweep_angles(angle_prior):
     return out
 
 
-# ---------------------------------------------------------------- markers
 
 def detect_ellipses(gray):
     """Elliptical ring markers (the etiqueta oval): fitEllipse on ink contours
@@ -423,7 +421,6 @@ def best_marker_for_label(gray, detected, contour, label, fit_max=8000.0):
     return best
 
 
-# ---------------------------------------------------------------- library
 
 def load_library(extra_paths=()):
     """Glyph samples: bundled npz + optional user libraries. Returns
@@ -475,7 +472,6 @@ def _min_dist(norm, stack):
     return best
 
 
-# ---------------------------------------------------------------- matching
 
 def display_variants(label):
     """How a stored etiqueta may be drawn on the sheet: 0004 -> 04, 003A -> 03A."""

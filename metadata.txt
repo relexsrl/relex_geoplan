@@ -9,6 +9,7 @@ email=contacto@relex.ar
 homepage=https://github.com/relexsrl/relex_geoplan
 repository=https://github.com/relexsrl/relex_geoplan
 tracker=https://github.com/relexsrl/relex_geoplan/issues
+license=GPL-2.0
 category=Raster
 icon=icon.svg
 experimental=True

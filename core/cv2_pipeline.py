@@ -29,15 +29,15 @@ from scipy import ndimage
 from shapely.geometry import LineString, Polygon as ShapelyPolygon
 from shapely.ops import polygonize, polygonize_full, unary_union
 
+from .models import Coord, Geotransform, Offset, Point, Polyline, Roi
+from .preprocess import mask_padding
+from .world import coord_to_point, polyline_to_world, world_to_coord
+
 cv2: Any
 try:
     import cv2
 except ImportError:
     cv2 = None
-
-from .models import Coord, Geotransform, Offset, Point, Polyline, Roi
-from .preprocess import mask_padding
-from .world import coord_to_point, polyline_to_world, world_to_coord
 
 Shape2D = tuple[int, int]
 LineSegment = tuple[Coord, Coord]
@@ -128,7 +128,6 @@ def extract_with_cv2(
     valid_roi = mask_padding(array_roi)
     offset = Offset(roi.row0, roi.col0)
 
-    # 1. Binary mask
     threshold_mask = _binarize(array_roi, valid_roi)
 
     # Auto-estimate line width if not provided (granulometry; D19/§10-C).
