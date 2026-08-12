@@ -152,7 +152,7 @@ y **agrega** las entidades. Requiere que cada parcela tenga su número (`etiquet
 
 Copyright © 2026 Relex SRL.
 
-Relex Geoplan se distribuye bajo la licencia [GPL-2.0](LICENSE).
+Relex Geoplan se distribuye bajo la licencia [GPL-2.0-or-later](LICENSE).
 
 ## Soporte
 
