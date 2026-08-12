@@ -37,6 +37,43 @@ localmente los números de parcela para reconstruir el código catastral.
 3. En **Instalar desde ZIP**, seleccionar `relex_geoplan.zip`.
 4. Activar **Relex Geoplan**.
 
+### Instalación manual de dependencias
+
+Si el complemento informa que falta una dependencia, verificar primero la versión principal
+de NumPy en la **Consola de Python** de QGIS:
+
+```python
+import numpy; print(numpy.__version__)
+```
+
+Luego cerrar QGIS e instalar las dependencias con el intérprete de Python incluido con QGIS.
+En Windows, ejecutar en PowerShell uno de estos comandos (ajustando la ruta y versión de
+QGIS si corresponde).
+
+Para NumPy 1.x:
+
+```powershell
+& "C:\Program Files\QGIS 3.44.11\bin\python-qgis-ltr.bat" -m pip install --user --no-deps "scipy>=1.7" "shapely>=1.8" "opencv-contrib-python-headless>=4.8,<4.12"
+```
+
+Para NumPy 2.x:
+
+```powershell
+& "C:\Program Files\QGIS 3.44.11\bin\python-qgis-ltr.bat" -m pip install --user --no-deps "scipy>=1.7" "shapely>=1.8" "opencv-contrib-python-headless>=4.13,<5"
+```
+
+En Linux o macOS, reemplazar el ejecutable de Windows por el intérprete del entorno de
+QGIS y conservar los rangos correspondientes, por ejemplo:
+
+```bash
+<python-de-qgis> -m pip install --user --no-deps "scipy>=1.7" "shapely>=1.8" "opencv-contrib-python-headless>=4.13,<5"
+```
+
+No instalar ni actualizar NumPy con este comando: QGIS ya incluye una versión compatible.
+Reiniciar QGIS después de la instalación. Cuando sea posible, usar el comando exacto que
+muestra el complemento, ya que identifica el intérprete correspondiente a la instalación
+activa de QGIS.
+
 ## Uso rápido
 
 Cinco pasos para extraer, revisar y publicar geometría.
